@@ -87,6 +87,12 @@ def get_available_jumpstart_packs(user_catalog):
             retlist.append(pack)
     return retlist
 
+def validate_username(username):
+    if username in collection_dict:
+        return True
+    else:
+        return False
+
 arena_ids=load_json_from_file()
 
 jumpstart_packs=get_jumpstart_packs()
@@ -110,26 +116,29 @@ async def on_message(message):
         return        
     if message.content.lower().startswith("heybot pick packs"):
         username=message.content.lower().replace("heybot pick packs ","")
-        random_pack_options=[]
-        picked_packs=[]
-        while len(picked_packs)<2:
+        if validate_username(username):
             random_pack_options=[]
-            while len(random_pack_options)<3:
-                rand_num=random.randint(0, len(collection_dict[username])-1)
-                if rand_num not in random_pack_options and rand_num not in picked_packs:
-                    random_pack_options.append(rand_num)
-            response_str="0: " + collection_dict[username][random_pack_options[0]].split('_', 1)[0] + ". 1: " + collection_dict[username][random_pack_options[1]].split('_', 1)[0] + ". 2: " + collection_dict[username][random_pack_options[2]].split('_', 1)[0] + ". q: quit"
-            await message.channel.send(response_str)
-            
-            def check(m):
-                return m.content in ['0','1','2','q'] and m.channel == channel
+            picked_packs=[]
+            while len(picked_packs)<2:
+                random_pack_options=[]
+                while len(random_pack_options)<3:
+                    rand_num=random.randint(0, len(collection_dict[username])-1)
+                    if rand_num not in random_pack_options and rand_num not in picked_packs:
+                        random_pack_options.append(rand_num)
+                response_str="0: " + collection_dict[username][random_pack_options[0]].split('_', 1)[0] + ". 1: " + collection_dict[username][random_pack_options[1]].split('_', 1)[0] + ". 2: " + collection_dict[username][random_pack_options[2]].split('_', 1)[0] + ". q: quit"
+                await message.channel.send(response_str)
+                
+                def check(m):
+                    return m.content in ['0','1','2','q'] and m.channel == channel
 
-            msg = await client.wait_for('message', check=check)
-            if msg.content=='q':
-                await message.channel.send("gotcha. bye")
-                break
-            else:
-                picked_packs.append(int(random_pack_options[int(msg.content)]))
+                msg = await client.wait_for('message', check=check)
+                if msg.content=='q':
+                    await message.channel.send("gotcha. bye")
+                    break
+                else:
+                    picked_packs.append(int(random_pack_options[int(msg.content)]))
+        else:
+            await message.channel.send("username not found")
         
         if len(picked_packs)==2:
             decklist="Deck\n"
@@ -156,6 +165,12 @@ async def on_message(message):
 
     elif message.content.lower().startswith("heybot print available"):
         username=message.content.lower().replace("heybot print available ","")
-        await channel.send(collection_dict[username])
+        if validate_username(username):
+            await channel.send(collection_dict[username])
+        else:
+            await message.channel.send("username not found")
+
+    elif message.content.lower().startswith("heybot print users"):
+        await channel.send(list(collection_dict.keys()))
 
 client.run(DISCORD_TOKEN)
