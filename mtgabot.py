@@ -6,6 +6,8 @@ import random
 
 from dotenv import load_dotenv
 
+script_dir=os.path.join(os.environ['USERPROFILE'], r"Documents\script")
+
 def write_arena_cards():
     with urllib.request.urlopen("https://api.scryfall.com/bulk-data") as url:
         data = json.loads(url.read().decode())
@@ -17,11 +19,11 @@ def write_arena_cards():
         if "arena_id" in card:
             retdict[str(card['arena_id'])] = card['name']
     # need to manually fix cards like claim // fame, etc
-    with open(os.path.join(os.environ['USERPROFILE'], r"Documents\script\arena-cards.json"), "w") as outfile: 
+    with open(os.path.join(script_dir, r"arena-cards.json"), "w") as outfile: 
         json.dump(retdict, outfile)    
 
 def load_json_from_file():
-    with open(os.path.join(os.environ['USERPROFILE'], r"Documents\script\arena-cards.json"), 'r', encoding='utf-8') as f:
+    with open(os.path.join(script_dir, r"arena-cards.json"), 'r', encoding='utf-8') as f:
         cards = json.load(f)
     return cards
 
@@ -47,7 +49,7 @@ def get_library_from_player_logstring(librarystring):
 
 
 def get_jumpstart_packs():
-    with open(os.path.join(os.environ['USERPROFILE'], r"Documents\script\all_jumps.txt"), 'r', encoding='utf-8') as f:
+    with open(os.path.join(script_dir, r"all_jumps.txt"), 'r', encoding='utf-8') as f:
         file_content = f.readlines()
     file_content = [x.strip() for x in file_content] 
 
@@ -94,7 +96,7 @@ random_pack_options=[]
 
 picked_packs=[]
 
-with open(os.path.join(os.environ['USERPROFILE'], r"Documents\script\user_collections.json"), 'r', encoding='utf-8') as f:
+with open(os.path.join(script_dir, r"user_collections.json"), 'r', encoding='utf-8') as f:
         collection_dict = json.load(f)
 
 load_dotenv()
@@ -144,7 +146,7 @@ async def on_message(message):
 
             available__jumpstart_packs=get_available_jumpstart_packs(user_catalog)
             collection_dict[username]=available__jumpstart_packs
-            with open(os.path.join(os.environ['USERPROFILE'], r"Documents\script\user_collections.json"), "w") as outfile: 
+            with open(os.path.join(script_dir, r"user_collections.json"), "w") as outfile: 
                 json.dump(collection_dict, outfile)    
 
             
